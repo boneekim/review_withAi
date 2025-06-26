@@ -198,103 +198,56 @@ st.markdown("""
 </div>
 """, unsafe_allow_html=True)
 
-# AI 모델 선택 섹션 (메인 페이지 상단)
-st.markdown("""
-<div class="ai-model-section">
-    <h3>🧠 AI 모델 선택</h3>
-</div>
-""", unsafe_allow_html=True)
+# AI 모델 선택 (숨김 처리 - 기본값 Gemini 사용)
+ai_model = "gemini"  # 기본값으로 Gemini 사용
+api_key = "auto"     # Gemini 자동 연결
 
-col_ai1, col_ai2 = st.columns(2)
+# 메인 콘텐츠 - 단일 컬럼 레이아웃
+# 상품 정보 입력
+st.markdown("### 📦 상품/서비스 정보")
+product_info = st.text_area(
+    "체험하고 싶은 상품이나 서비스에 대해 자세히 설명해주세요:",
+    placeholder="새로운 스킨케어 제품, 건강식품, 전자제품, 맛집 등\n\n상세할수록 더 좋은 결과를 얻을 수 있습니다!",
+    height=120
+)
 
-with col_ai1:
-    ai_model = st.radio(
-        "AI 모델을 선택하세요:",
-        ["gemini", "openai"],
-        format_func=lambda x: "⚡ Gemini (무료 AI)" if x == "gemini" else "🚀 OpenAI GPT (고품질)",
-        index=0
-    )
+# 글 유형 선택
+st.markdown("### ✏️ 글 유형 선택")
+content_type = st.radio(
+    "원하는 글 유형을 선택하세요:",
+    ["application", "review"],
+    format_func=lambda x: "📝 체험단 응모글" if x == "application" else "⭐ 체험 후기/리뷰",
+    horizontal=True
+)
 
-with col_ai2:
-    # API 키 입력
-    if ai_model == "openai":
-        st.markdown("#### 🔑 OpenAI API 키")
-        api_key = st.text_input(
-            "API 키를 입력하세요:",
-            type="password",
-            placeholder="sk-...",
-            help="OpenAI API 키를 입력하세요. 발급: https://platform.openai.com/api-keys"
-        )
-        st.markdown("""
-        <div style="background: #fffbeb; border: 1px solid #fde68a; padding: 0.5rem; border-radius: 5px; font-size: 0.8rem; color: #92400e;">
-        💰 비용: 약 $0.002/요청 (매우 저렴)
-        </div>
-        """, unsafe_allow_html=True)
-    else:
-        api_key = "auto"
-        st.markdown("#### ⚡ Gemini AI - 자동 연결")
-        st.markdown("""
-        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; color: #16a34a; padding: 1rem; border-radius: 8px;">
-        ✅ <strong>자동으로 연결됩니다!</strong><br>
-        API 키 입력 없이 바로 사용 가능한 무료 AI입니다.
-        </div>
-        """, unsafe_allow_html=True)
+# 추가 요청사항
+st.markdown("### 💡 추가 요청사항 (선택)")
+additional_info = st.text_area(
+    "특별한 요구사항이나 포함했으면 하는 내용:",
+    value='맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.',
+    placeholder="특정 연령대 대상, 특별한 상황, 강조하고 싶은 포인트 등",
+    height=100
+)
 
-st.markdown("""
-<div class="cost-info">
-💡 <strong>추천:</strong> Gemini 먼저 시도 (무료) → OpenAI (고품질) 순으로 사용해보세요!
-</div>
-""", unsafe_allow_html=True)
+# 생성 옵션 섹션
+st.markdown("### 🎯 생성 옵션")
 
-st.markdown("---")
+col_gen1, col_gen2 = st.columns([1, 2])
 
-# 메인 콘텐츠
-col1, col2 = st.columns([2, 1])
-
-with col1:
-    # 상품 정보 입력
-    st.markdown("### 📦 상품/서비스 정보")
-    product_info = st.text_area(
-        "체험하고 싶은 상품이나 서비스에 대해 자세히 설명해주세요:",
-        placeholder="새로운 스킨케어 제품, 건강식품, 전자제품, 맛집 등\n\n상세할수록 더 좋은 결과를 얻을 수 있습니다!",
-        height=120
-    )
-    
-    # 글 유형 선택
-    st.markdown("### ✏️ 글 유형 선택")
-    content_type = st.radio(
-        "원하는 글 유형을 선택하세요:",
-        ["application", "review"],
-        format_func=lambda x: "📝 체험단 응모글" if x == "application" else "⭐ 체험 후기/리뷰",
-        horizontal=True
-    )
-    
-    # 추가 요청사항
-    st.markdown("### 💡 추가 요청사항 (선택)")
-    additional_info = st.text_area(
-        "특별한 요구사항이나 포함했으면 하는 내용:",
-        value='맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.',
-        placeholder="특정 연령대 대상, 특별한 상황, 강조하고 싶은 포인트 등",
-        height=100
-    )
-
-with col2:
-    st.markdown("### 🎯 생성 옵션")
-    
+with col_gen1:
     # 생성 버튼
     generate_btn = st.button(
         "✨ AI로 생성하기",
         type="primary",
         use_container_width=True
     )
-    
-    # 단축키 안내
+
+with col_gen2:
+    # 사용 팁
     st.markdown("""
     <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; font-size: 0.9rem;">
-    💡 <strong>사용 팁:</strong><br>
-    • 상품 정보를 자세히 입력할수록 좋은 결과<br>
-    • Gemini는 무료로 먼저 시도해보세요<br>
-    • OpenAI는 더 고품질의 결과 제공
+    💡 <strong>사용 팁:</strong> 상품 정보를 자세히 입력할수록 더 좋은 결과를 얻을 수 있습니다!<br>
+    🤖 <strong>AI 엔진:</strong> Google Gemini (무료) 자동 사용
     </div>
     """, unsafe_allow_html=True)
 
