@@ -229,27 +229,12 @@ additional_info = st.text_area(
     height=100
 )
 
-# 생성 옵션 섹션
-st.markdown("### 🎯 생성 옵션")
-
-col_gen1, col_gen2 = st.columns([1, 2])
-
-with col_gen1:
-    # 생성 버튼
-    generate_btn = st.button(
-        "✨ AI로 생성하기",
-        type="primary",
-        use_container_width=True
-    )
-
-with col_gen2:
-    # 사용 팁
-    st.markdown("""
-    <div style="background: #f3f4f6; padding: 1rem; border-radius: 8px; font-size: 0.9rem;">
-    💡 <strong>사용 팁:</strong> 상품 정보를 자세히 입력할수록 더 좋은 결과를 얻을 수 있습니다!<br>
-    🤖 <strong>AI 엔진:</strong> Google Gemini (무료) 자동 사용
-    </div>
-    """, unsafe_allow_html=True)
+# 생성 버튼
+generate_btn = st.button(
+    "✨ AI로 생성하기",
+    type="primary",
+    use_container_width=True
+)
 
 # 생성 로직
 if generate_btn:
