@@ -324,6 +324,46 @@ if generate_btn:
                 else:
                     final_content = generated_content
                 
+                # 자동 클립보드 복사
+                auto_copy_script = f"""
+                <script>
+                (function() {{
+                    const text = {json.dumps(final_content)};
+                    if (navigator.clipboard && window.isSecureContext) {{
+                        navigator.clipboard.writeText(text).then(() => {{
+                            console.log('클립보드에 자동 복사 완료');
+                        }}).catch(() => {{
+                            fallbackCopy(text);
+                        }});
+                    }} else {{
+                        fallbackCopy(text);
+                    }}
+                    
+                    function fallbackCopy(text) {{
+                        const textArea = document.createElement('textarea');
+                        textArea.value = text;
+                        textArea.style.position = 'fixed';
+                        textArea.style.left = '-999999px';
+                        textArea.style.top = '-999999px';
+                        document.body.appendChild(textArea);
+                        textArea.focus();
+                        textArea.select();
+                        try {{
+                            document.execCommand('copy');
+                            console.log('클립보드에 자동 복사 완료');
+                        }} catch (err) {{
+                            console.log('자동 복사 실패');
+                        }}
+                        document.body.removeChild(textArea);
+                    }}
+                }})();
+                </script>
+                """
+                st.markdown(auto_copy_script, unsafe_allow_html=True)
+                
+                # 복사 완료 알림
+                st.info("📋 생성된 내용이 클립보드에 자동으로 복사되었습니다!")
+                
                 # 결과 컨테이너
                 result_container = st.container()
                 with result_container:
@@ -333,54 +373,6 @@ if generate_btn:
                     <div style="line-height: 1.6; white-space: pre-wrap;">{final_content}</div>
                     </div>
                     """, unsafe_allow_html=True)
-                    
-                    # 복사 버튼
-                    st.markdown("### 📋 복사하기")
-                    
-                    # Streamlit의 code 컴포넌트를 활용한 복사 기능
-                    col1, col2 = st.columns([3, 1])
-                    
-                    with col1:
-                        if st.button("📋 클립보드에 복사", type="primary", use_container_width=True):
-                            # JavaScript를 사용한 클립보드 복사
-                            copy_script = f"""
-                            <script>
-                            (function() {{
-                                const text = {json.dumps(final_content)};
-                                if (navigator.clipboard && window.isSecureContext) {{
-                                    navigator.clipboard.writeText(text).then(() => {{
-                                        alert('✅ 클립보드에 복사되었습니다!');
-                                    }}).catch(() => {{
-                                        fallbackCopy(text);
-                                    }});
-                                }} else {{
-                                    fallbackCopy(text);
-                                }}
-                                
-                                function fallbackCopy(text) {{
-                                    const textArea = document.createElement('textarea');
-                                    textArea.value = text;
-                                    textArea.style.position = 'fixed';
-                                    textArea.style.left = '-999999px';
-                                    textArea.style.top = '-999999px';
-                                    document.body.appendChild(textArea);
-                                    textArea.focus();
-                                    textArea.select();
-                                    try {{
-                                        document.execCommand('copy');
-                                        alert('✅ 클립보드에 복사되었습니다!');
-                                    }} catch (err) {{
-                                        alert('❌ 복사에 실패했습니다. 내용을 직접 선택해서 복사해주세요.');
-                                    }}
-                                    document.body.removeChild(textArea);
-                                }}
-                            }})();
-                            </script>
-                            """
-                            st.markdown(copy_script, unsafe_allow_html=True)
-                    
-                    # 코드 블록으로 내용 표시 (자동 복사 버튼 포함)
-                    st.code(final_content, language=None)
                 
         except requests.exceptions.Timeout:
             st.error("❌ API 요청 시간이 초과되었습니다. 다시 시도해주세요.")
