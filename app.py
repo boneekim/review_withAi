@@ -324,46 +324,6 @@ if generate_btn:
                 else:
                     final_content = generated_content
                 
-                # 자동 클립보드 복사
-                auto_copy_script = f"""
-                <script>
-                (function() {{
-                    const text = {json.dumps(final_content)};
-                    if (navigator.clipboard && window.isSecureContext) {{
-                        navigator.clipboard.writeText(text).then(() => {{
-                            console.log('클립보드에 자동 복사 완료');
-                        }}).catch(() => {{
-                            fallbackCopy(text);
-                        }});
-                    }} else {{
-                        fallbackCopy(text);
-                    }}
-                    
-                    function fallbackCopy(text) {{
-                        const textArea = document.createElement('textarea');
-                        textArea.value = text;
-                        textArea.style.position = 'fixed';
-                        textArea.style.left = '-999999px';
-                        textArea.style.top = '-999999px';
-                        document.body.appendChild(textArea);
-                        textArea.focus();
-                        textArea.select();
-                        try {{
-                            document.execCommand('copy');
-                            console.log('클립보드에 자동 복사 완료');
-                        }} catch (err) {{
-                            console.log('자동 복사 실패');
-                        }}
-                        document.body.removeChild(textArea);
-                    }}
-                }})();
-                </script>
-                """
-                st.markdown(auto_copy_script, unsafe_allow_html=True)
-                
-                # 복사 완료 알림
-                st.info("📋 생성된 내용이 클립보드에 자동으로 복사되었습니다!")
-                
                 # 결과 컨테이너
                 result_container = st.container()
                 with result_container:
@@ -373,6 +333,19 @@ if generate_btn:
                     <div style="line-height: 1.6; white-space: pre-wrap;">{final_content}</div>
                     </div>
                     """, unsafe_allow_html=True)
+                
+                # 복사 안내 및 텍스트 영역
+                st.markdown("### 📋 생성된 내용")
+                st.info("💡 아래 텍스트를 **전체 선택(Ctrl+A 또는 Cmd+A)** 후 **복사(Ctrl+C 또는 Cmd+C)**해주세요!")
+                
+                # 복사하기 쉬운 텍스트 영역
+                st.text_area(
+                    label="복사할 내용",
+                    value=final_content,
+                    height=300,
+                    key="final_copy_area",
+                    help="이 영역을 클릭한 후 Ctrl+A(전체선택) → Ctrl+C(복사) 하세요"
+                )
                 
         except requests.exceptions.Timeout:
             st.error("❌ API 요청 시간이 초과되었습니다. 다시 시도해주세요.")
