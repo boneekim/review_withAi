@@ -222,9 +222,16 @@ content_type = st.radio(
 
 # 추가 요청사항
 st.markdown("### 💡 추가 요청사항 (선택)")
+
+# 글 유형에 따라 다른 기본값 설정
+if content_type == "review":
+    default_additional_info = '맨앞에 "예스24 리뷰어클럽 서평단 자격으로 도서를 제공받고 작성한 리뷰입니다."를 추가해줘.\n마지막에 "리뷰어클럽리뷰" 를 추가해줘.'
+else:
+    default_additional_info = '맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.\n젊은 말투로 존경어는 써서 정중하게 써줘.'
+
 additional_info = st.text_area(
     "특별한 요구사항이나 포함했으면 하는 내용:",
-    value='맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.\n젊은 말투로 존경어는 써서 정중하게 써줘.',
+    value=default_additional_info,
     placeholder="특정 연령대 대상, 특별한 상황, 강조하고 싶은 포인트 등",
     height=100
 )
