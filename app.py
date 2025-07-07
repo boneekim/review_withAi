@@ -334,53 +334,53 @@ if generate_btn:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # 복사 버튼과 JavaScript 기능
+                    # 복사 버튼
                     st.markdown("### 📋 복사하기")
                     
-                    # 안전한 문자열 인코딩을 위한 처리
-                    safe_content = json.dumps(final_content)
+                    # Streamlit의 code 컴포넌트를 활용한 복사 기능
+                    col1, col2 = st.columns([3, 1])
                     
-                    # 클립보드 복사를 위한 JavaScript 포함
-                    copy_js = f"""
-                    <script>
-                    function copyToClipboard() {{
-                        var text = {safe_content};
-                        navigator.clipboard.writeText(text).then(function() {{
-                            alert('클립보드에 복사되었습니다! ✅');
-                        }}, function() {{
-                            // 복사 실패 시 대안 방법
-                            var textArea = document.createElement("textarea");
-                            textArea.value = text;
-                            document.body.appendChild(textArea);
-                            textArea.select();
-                            textArea.setSelectionRange(0, 99999);
-                            document.execCommand("copy");
-                            document.body.removeChild(textArea);
-                            alert('클립보드에 복사되었습니다! ✅');
-                        }});
-                    }}
-                    </script>
+                    with col1:
+                        if st.button("📋 클립보드에 복사", type="primary", use_container_width=True):
+                            # JavaScript를 사용한 클립보드 복사
+                            copy_script = f"""
+                            <script>
+                            (function() {{
+                                const text = {json.dumps(final_content)};
+                                if (navigator.clipboard && window.isSecureContext) {{
+                                    navigator.clipboard.writeText(text).then(() => {{
+                                        alert('✅ 클립보드에 복사되었습니다!');
+                                    }}).catch(() => {{
+                                        fallbackCopy(text);
+                                    }});
+                                }} else {{
+                                    fallbackCopy(text);
+                                }}
+                                
+                                function fallbackCopy(text) {{
+                                    const textArea = document.createElement('textarea');
+                                    textArea.value = text;
+                                    textArea.style.position = 'fixed';
+                                    textArea.style.left = '-999999px';
+                                    textArea.style.top = '-999999px';
+                                    document.body.appendChild(textArea);
+                                    textArea.focus();
+                                    textArea.select();
+                                    try {{
+                                        document.execCommand('copy');
+                                        alert('✅ 클립보드에 복사되었습니다!');
+                                    }} catch (err) {{
+                                        alert('❌ 복사에 실패했습니다. 내용을 직접 선택해서 복사해주세요.');
+                                    }}
+                                    document.body.removeChild(textArea);
+                                }}
+                            }})();
+                            </script>
+                            """
+                            st.markdown(copy_script, unsafe_allow_html=True)
                     
-                    <button onclick="copyToClipboard()" 
-                            style="background: linear-gradient(45deg, #667eea, #764ba2); 
-                                   color: white; 
-                                   border: none; 
-                                   padding: 12px 24px; 
-                                   border-radius: 8px; 
-                                   cursor: pointer;
-                                   font-size: 16px;
-                                   font-weight: bold;
-                                   margin-bottom: 15px;
-                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-                        📋 클립보드에 복사
-                    </button>
-                    """
-                    
-                    st.markdown(copy_js, unsafe_allow_html=True)
-                    
-                    # 수동 복사를 위한 텍스트 영역 (백업용)
-                    st.markdown("**또는 아래 내용을 직접 복사하세요:**")
-                    st.text_area("생성된 내용", value=final_content, height=200, key="copy_text_area")
+                    # 코드 블록으로 내용 표시 (자동 복사 버튼 포함)
+                    st.code(final_content, language=None)
                 
         except requests.exceptions.Timeout:
             st.error("❌ API 요청 시간이 초과되었습니다. 다시 시도해주세요.")
