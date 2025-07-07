@@ -336,7 +336,7 @@ if generate_btn:
                 
                 # 복사 안내 및 텍스트 영역
                 st.markdown("### 📋 생성된 내용")
-                st.info("💡 아래 텍스트를 **전체 선택(Ctrl+A 또는 Cmd+A)** 후 **복사(Ctrl+C 또는 Cmd+C)**해주세요!")
+                st.info("💡 텍스트가 자동으로 선택되어 있습니다! **Ctrl+C** 또는 **Cmd+C**만 누르면 복사됩니다!")
                 
                 # 복사하기 쉬운 텍스트 영역
                 st.text_area(
@@ -344,8 +344,44 @@ if generate_btn:
                     value=final_content,
                     height=300,
                     key="final_copy_area",
-                    help="이 영역을 클릭한 후 Ctrl+A(전체선택) → Ctrl+C(복사) 하세요"
+                    help="텍스트가 자동으로 선택되어 있습니다. Ctrl+C(복사) 또는 Cmd+C만 누르세요"
                 )
+                
+                # 자동 선택을 위한 JavaScript
+                auto_select_script = f"""
+                <script>
+                (function() {{
+                    // 페이지가 로드된 후 실행
+                    setTimeout(function() {{
+                        // 텍스트 영역을 찾아서 자동 선택
+                        const textArea = document.querySelector('textarea[aria-label="복사할 내용"]');
+                        if (textArea) {{
+                            textArea.focus();
+                            textArea.select();
+                            textArea.setSelectionRange(0, textArea.value.length);
+                            
+                            // 자동 복사 시도
+                            try {{
+                                if (navigator.clipboard && window.isSecureContext) {{
+                                    navigator.clipboard.writeText(textArea.value).then(() => {{
+                                        console.log('자동 복사 완료');
+                                    }}).catch(() => {{
+                                        document.execCommand('copy');
+                                        console.log('대안 복사 완료');
+                                    }});
+                                }} else {{
+                                    document.execCommand('copy');
+                                    console.log('대안 복사 완료');
+                                }}
+                            }} catch (err) {{
+                                console.log('자동 복사 실패, 수동 복사 필요');
+                            }}
+                        }}
+                    }}, 500);
+                }})();
+                </script>
+                """
+                st.markdown(auto_select_script, unsafe_allow_html=True)
                 
         except requests.exceptions.Timeout:
             st.error("❌ API 요청 시간이 초과되었습니다. 다시 시도해주세요.")
