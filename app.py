@@ -240,10 +240,17 @@ additional_info = st.text_area(
 url_content = ""
 if content_type == "application":
     st.markdown("### 🔗 URL 입력 (선택)")
+    
+    # session state 초기화
+    if 'url_input' not in st.session_state:
+        st.session_state.url_input = ""
+    
     url_content = st.text_input(
         "추가하고 싶은 URL이나 링크:",
+        value=st.session_state.url_input,
         placeholder="예: https://example.com 또는 기타 링크",
-        help="입력한 URL은 생성된 결과 맨 위에 표시됩니다."
+        help="입력한 URL은 생성된 결과 맨 위에 표시됩니다.",
+        key="url_input_field"
     )
 
 # 생성 버튼
@@ -303,6 +310,10 @@ if generate_btn:
                 
                 # 결과 표시
                 st.success(f"🎉 {ai_model.upper()}로 성공적으로 생성되었습니다!")
+                
+                # URL 입력폼 초기화 (체험단 응모글인 경우)
+                if content_type == "application" and 'url_input' in st.session_state:
+                    st.session_state.url_input = ""
                 
                 st.markdown("### 📄 생성된 결과")
                 
