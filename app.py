@@ -203,15 +203,7 @@ ai_model = "gemini"  # 기본값으로 Gemini 사용
 api_key = "auto"     # Gemini 자동 연결
 
 # 메인 콘텐츠 - 단일 컬럼 레이아웃
-# 상품 정보 입력
-st.markdown("### 📦 상품/서비스 정보")
-product_info = st.text_area(
-    "체험하고 싶은 상품이나 서비스에 대해 자세히 설명해주세요:",
-    placeholder="새로운 스킨케어 제품, 건강식품, 전자제품, 맛집 등\n\n상세할수록 더 좋은 결과를 얻을 수 있습니다!",
-    height=120
-)
-
-# 글 유형 선택
+# 1. 글 유형 선택 (제일 상단)
 st.markdown("### ✏️ 글 유형 선택")
 content_type = st.radio(
     "원하는 글 유형을 선택하세요:",
@@ -220,23 +212,15 @@ content_type = st.radio(
     horizontal=True
 )
 
-# 추가 요청사항
-st.markdown("### 💡 추가 요청사항 (선택)")
-
-# 글 유형에 따라 다른 기본값 설정
-if content_type == "review":
-    default_additional_info = '맨앞에 "예스24 리뷰어클럽 서평단 자격으로 도서를 제공받고 작성한 리뷰입니다."를 추가해줘.\n마지막에 "리뷰어클럽리뷰" 를 추가해줘.'
-else:
-    default_additional_info = '맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.\n젊은 말투로 존경어는 써서 정중하게 써줘.'
-
-additional_info = st.text_area(
-    "특별한 요구사항이나 포함했으면 하는 내용:",
-    value=default_additional_info,
-    placeholder="특정 연령대 대상, 특별한 상황, 강조하고 싶은 포인트 등",
-    height=100
+# 2. 상품 정보 입력
+st.markdown("### 📦 상품/서비스 정보")
+product_info = st.text_area(
+    "체험하고 싶은 상품이나 서비스에 대해 자세히 설명해주세요:",
+    placeholder="새로운 스킨케어 제품, 건강식품, 전자제품, 맛집 등\n\n상세할수록 더 좋은 결과를 얻을 수 있습니다!",
+    height=120
 )
 
-# 체험단 응모글일 때만 URL 입력폼 표시
+# 3. URL 입력 (체험단 응모글일 때만)
 url_content = ""
 if content_type == "application":
     st.markdown("### 🔗 URL 입력 (선택)")
@@ -253,7 +237,23 @@ if content_type == "application":
         key="url_input_field"
     )
 
-# 생성 버튼
+# 4. 추가 요청사항
+st.markdown("### 💡 추가 요청사항 (선택)")
+
+# 글 유형에 따라 다른 기본값 설정
+if content_type == "review":
+    default_additional_info = '맨앞에 "예스24 리뷰어클럽 서평단 자격으로 도서를 제공받고 작성한 리뷰입니다."를 추가해줘.\n마지막에 "리뷰어클럽리뷰" 를 추가해줘.'
+else:
+    default_additional_info = '맨앞에 "소식받기, 상품찜, 공유 완료!"를 추가해줘.\n그리고 3-5줄 정도 짧은 글로 간절함과 경험 바탕으로 신청 사유를 작성해줘.\n젊은 말투로 존경어는 써서 정중하게 써줘.'
+
+additional_info = st.text_area(
+    "특별한 요구사항이나 포함했으면 하는 내용:",
+    value=default_additional_info,
+    placeholder="특정 연령대 대상, 특별한 상황, 강조하고 싶은 포인트 등",
+    height=100
+)
+
+# 5. 생성 버튼
 generate_btn = st.button(
     "✨ AI로 생성하기",
     type="primary",
@@ -334,10 +334,53 @@ if generate_btn:
                     </div>
                     """, unsafe_allow_html=True)
                     
-                    # 복사 버튼
-                    if st.button("📋 클립보드에 복사", key="copy_btn"):
-                        st.write("텍스트를 선택해서 복사해주세요:")
-                        st.code(final_content, language=None)
+                    # 복사 버튼과 JavaScript 기능
+                    st.markdown("### 📋 복사하기")
+                    
+                    # 안전한 문자열 인코딩을 위한 처리
+                    safe_content = json.dumps(final_content)
+                    
+                    # 클립보드 복사를 위한 JavaScript 포함
+                    copy_js = f"""
+                    <script>
+                    function copyToClipboard() {{
+                        var text = {safe_content};
+                        navigator.clipboard.writeText(text).then(function() {{
+                            alert('클립보드에 복사되었습니다! ✅');
+                        }}, function() {{
+                            // 복사 실패 시 대안 방법
+                            var textArea = document.createElement("textarea");
+                            textArea.value = text;
+                            document.body.appendChild(textArea);
+                            textArea.select();
+                            textArea.setSelectionRange(0, 99999);
+                            document.execCommand("copy");
+                            document.body.removeChild(textArea);
+                            alert('클립보드에 복사되었습니다! ✅');
+                        }});
+                    }}
+                    </script>
+                    
+                    <button onclick="copyToClipboard()" 
+                            style="background: linear-gradient(45deg, #667eea, #764ba2); 
+                                   color: white; 
+                                   border: none; 
+                                   padding: 12px 24px; 
+                                   border-radius: 8px; 
+                                   cursor: pointer;
+                                   font-size: 16px;
+                                   font-weight: bold;
+                                   margin-bottom: 15px;
+                                   box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+                        📋 클립보드에 복사
+                    </button>
+                    """
+                    
+                    st.markdown(copy_js, unsafe_allow_html=True)
+                    
+                    # 수동 복사를 위한 텍스트 영역 (백업용)
+                    st.markdown("**또는 아래 내용을 직접 복사하세요:**")
+                    st.text_area("생성된 내용", value=final_content, height=200, key="copy_text_area")
                 
         except requests.exceptions.Timeout:
             st.error("❌ API 요청 시간이 초과되었습니다. 다시 시도해주세요.")
